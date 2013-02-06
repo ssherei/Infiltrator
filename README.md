@@ -20,6 +20,7 @@ the working model is as follows.
 increase ImageSize in IMAGE_NT_HEADER.OptionalHeader.ImageSize --> add rest of PE file --> write payload in our new section --> write to new PE file 
 
 Refrences:
+
 https://www.corelan.be/index.php/2010/02/25/exploit-writing-tutorial-part-9-introduction-to-win32-shellcoding/
 http://win32assembly.programminghorizon.com
 http://en.wikibooks.org/wiki/X86_Disassembly/Windows_Executable_Files#MS-DOS_header
@@ -29,6 +30,7 @@ http://www.codereversing.com/blog/?p=92
 http://www.alex-ionescu.com/part1.pdf
 
 Credits:
+
 		[*] corelanc0d3r "https://www.corelan.be".
 				"Thanks for the insight on the threaded shellcode & amazing tutorials"
 		[*] Sherif El deeb "http://eldeeb.net/wrdprs/".
@@ -37,15 +39,18 @@ Credits:
 				" Thanks for the amazingly well documented project metasploit framework"
 
 Author:
+
 		[*] Saif El-Sherei 	* website: "http://www.elsherei.com" 
 							* Twitter: @saif_sherei
 							* email: saif.elsherei@gmail.com
 Features:
+
 		[*] Three Payload Types (bind tcp, reverse tcp, download and execute).
 		[*] Choose between threaded shellcode or blocking shellcode.
 		[*] specify shellcode options; no need for hardcoding (see usage below).
 		[*] PE executable works normaly without any issues.
 Todo:
+
 		[*] Payload encoding.
 Usage:
 
@@ -69,15 +74,14 @@ Usage:
 
 [*] Payload Types:
 
- "bind"                           Bind payload Followed by payload options
- "reverse"                        Connect Back Payload Followed by payload options
-
- "download & execute"     Download & exec Payload Followed by payload options
+ "bind"                          	 Bind payload Followed by payload options
+ "reverse"                        	Connect Back Payload Followed by payload options
+ "download & execute"     		Download & exec Payload Followed by payload options
 
 [*] Payload Options:
 
- -p [port]                      port to use (Bind or Reverse Payload)
- -h [host]                      Host to connect to (Reverse Payload)
- -u [url]                       URL to connect to (Download & Exec Payload)
- -f [path]                      path to file to fetch (Download & Exec Payload)
- -of[output file]       output file to Execute from  Download & Exec Payload
+ -p [port]                      	port to use (Bind or Reverse Payload)
+ -h [host]                      	Host to connect to (Reverse Payload)
+ -u [url]                      		URL to connect to (Download & Exec Payload)
+ -f [path]                     		path to file to fetch (Download & Exec Payload)
+ -of[output file]      			output file to Execute from  Download & Exec Payload
