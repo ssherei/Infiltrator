@@ -65,13 +65,13 @@ http://www.alex-ionescu.com/part1.pdf
 
 [*] Options:
 
- -i   				INPUT file.exe (PE)
+ -i [EXE]   				INPUT file.exe (PE)
  
- -o 				OUPUT file.exe (PE)
+ -o [EXE]				OUPUT file.exe (PE)
  
- -s    				Normal Shellcode followed by one of the payload types
+ -s [TYPE]   				Normal Shellcode followed by one of the payload types
  
- -k     			Threaded Shellcode followed by one of the payload types
+ -k [TYPE]    				Threaded Shellcode followed by one of the payload types
 
 [*] Payload Types:
 
@@ -92,4 +92,4 @@ http://www.alex-ionescu.com/part1.pdf
  
  -f [path]                     		path to file to fetch (Download & Exec Payload)
  
- -of[output file]      			output file to Execute from  Download & Exec Payload
+ -of [output file]      		output file to Execute from  Download & Exec Payload
