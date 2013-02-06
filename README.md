@@ -69,10 +69,10 @@ Usage:
 
 [*] Payload Types:
 
- bind                           Bind payload Followed by payload options
- reverse                        Connect Back Payload Followed by payload options
+ "bind"                           Bind payload Followed by payload options
+ "reverse"                        Connect Back Payload Followed by payload options
 
- download & execute     Download & exec Payload Followed by payload options
+ "download & execute"     Download & exec Payload Followed by payload options
 
 [*] Payload Options:
 
