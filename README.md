@@ -65,24 +65,31 @@ Usage:
 
 [*] Options:
 
- -i     INPUT file.exe (PE)
+ -i   				INPUT file.exe (PE)
  
- -o 	OUPUT file.exe (PE)
+ -o 				OUPUT file.exe (PE)
  
- -s     Normal Shellcode followed by one of the payload types
+ -s    				Normal Shellcode followed by one of the payload types
  
- -k     Threaded Shellcode followed by one of the payload types
+ -k     			Threaded Shellcode followed by one of the payload types
 
 [*] Payload Types:
 
- "bind"                          	 Bind payload Followed by payload options
+ "bind"                          	Bind payload Followed by payload options
+ 
  "reverse"                        	Connect Back Payload Followed by payload options
+ 
  "download & execute"     		Download & exec Payload Followed by payload options
+ 
 
 [*] Payload Options:
 
  -p [port]                      	port to use (Bind or Reverse Payload)
+ 
  -h [host]                      	Host to connect to (Reverse Payload)
+ 
  -u [url]                      		URL to connect to (Download & Exec Payload)
+ 
  -f [path]                     		path to file to fetch (Download & Exec Payload)
+ 
  -of[output file]      			output file to Execute from  Download & Exec Payload
