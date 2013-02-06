@@ -4,10 +4,15 @@ Infiltrator
 Infiltrator 0.1
 
 License:
+
   This work is licensed under the Creative Commons Attribution-NonCommercial 3.0 Unported License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc/3.0/.
+  
 Disclaimer:
+
 	This Tool is for learning & Demonstration only. the author is not responsible for any misuse of this code or tool. 
+	
 Introduction:
+
 	Intifltrator is my first c project (so dont be so harsh :D). It is a PE Executable backdoor tool. i.e. it inserts payloads in exe files so the exe will function normally and execute our own code through it.
 the working model is as follows.
 
