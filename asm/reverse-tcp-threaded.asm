@@ -434,9 +434,9 @@ start:
 
 	push eax		; set the lpEnviroment to NULL
 
-	;push 0x08000000		; set the dwcreationflag to CREATE_NO_WINDOW
+	push 0x08000000		; set the dwcreationflag to CREATE_NO_WINDOW
 
-	push eax		; set the dwcreationflag to 0
+	;push eax		; set the dwcreationflag to 0
 
 	inc eax			; eax = 1
 
