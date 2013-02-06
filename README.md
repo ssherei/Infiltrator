@@ -37,6 +37,8 @@ http://www.alex-ionescu.com/part1.pdf
 				"Thanks for the continous motovation, inspiration, & help through out this"
 		[*] Metasploit Team.
 				" Thanks for the amazingly well documented project metasploit framework"
+		[*] Stephen Fewer
+				" for his block_api method. i tweaked it to use function hashes explained by  skylined and corelan method"
 
 [*] Author:
 
