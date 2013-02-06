@@ -66,11 +66,12 @@ Usage:
 [*] Options:
 
  -i     INPUT file.exe (PE)
- -o  OUPUT file.exe (PE)
- -s     Normal Shellcode followed by one of the payload
-        types
- -k     Threaded Shellcode followed by one of the payload
-        types
+ 
+ -o 	OUPUT file.exe (PE)
+ 
+ -s     Normal Shellcode followed by one of the payload types
+ 
+ -k     Threaded Shellcode followed by one of the payload types
 
 [*] Payload Types:
 
